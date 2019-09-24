@@ -7,6 +7,7 @@ class Primer(object):
         self.pen = pen
         self.seq = seq
         self.start = start
+        self.stop = None
         self.length = length
         self.tm = tm
         self.gc = gc
@@ -15,6 +16,7 @@ class Primer(object):
         self.hairpin = hairpin
         self.stab = stab
         self.crispr = None
+        self.fail_case = None
     
     def output(self):
         out = "{},{},{},{},{}".format(self.seq, self.side, self.start, self.tm, self.gc)

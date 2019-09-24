@@ -5,12 +5,15 @@ import sys
 
 class Submission(object):
     """
-    Main wrapper that coordinates finding primers for a gene
+    Submissions are done on a gene level. They take a folder that contains a fasta file for that gene which contains the cds and the crispr sequences. See the examples for details.
+
+    They are meant so that parrallelization can be achieved on the gene level.
     """
 
     def __init__(self, file):
         self.file = file
         self.gene = ntp.Gene(self.file.split('/')[-1].split('.fasta')[0])
+        self.out = None
         self.step = "Init"
         # call the main set of functions
         self.main()
@@ -22,6 +25,8 @@ class Submission(object):
         self.find_primers()
         self.step = 'Sorting Primers'
         self.sort_primers()
+        self.step = 'Writing Output'
+        self.output()
 
     def handle_fasta(self):
         assert self.file
@@ -42,13 +47,16 @@ class Submission(object):
         """
         Sorts through potential primers to find good ones
         """
-        pass
+        self.gene.sort_primers()
 
     def output(self):
         """
         Writes a csv and returns information to autoprimer.
         """
-        pass
+        self.out = self.gene.sort_output()
+        header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%'
+        fname = self.file.split('.fasta')[0] + '_autoprimer_out.csv'
+        ntp.write_csv(fname, self.out, header=header)
 
 if __name__ == "__main__":
     Submission(sys.argv[1])

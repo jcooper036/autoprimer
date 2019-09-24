@@ -21,4 +21,9 @@ def parse_fasta(fasta, gene):
             gene.crisprs.append(cr)
         else:
             gene.cds = fasta[entry]
+
+    # assign the gene to each of the crisprs    
+    for cr in gene.crisprs:
+        cr.gene = gene
+
     return gene
