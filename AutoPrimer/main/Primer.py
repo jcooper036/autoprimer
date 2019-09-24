@@ -14,6 +14,7 @@ class Primer(object):
         self.endTH = endTH
         self.hairpin = hairpin
         self.stab = stab
+        self.crispr = None
     
     def output(self):
         out = "{},{},{},{},{}".format(self.seq, self.side, self.start, self.tm, self.gc)

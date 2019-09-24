@@ -9,24 +9,15 @@ def parse_fasta(fasta, gene):
     """
     for entry in fasta:
         if 'crispr' in entry:
-            entry = entry.split(' ')
-            for info in entry:
+            entrysp = entry.split(' ')
+            for info in entrysp:
                 if 'crispr' in info:
                     cr = ntp.Crispr(info.split(':')[1])
                 if 'segment' in info:
-                    # exon = info.split(':')[1]
+                    segment = info.split(':')[1]
                     pass
-            print(fasta)
             cr.seq = fasta[entry]
-            crisprs[name] = {
-                'seq' : crseq,
-                'name' : name,
-                # 'segment' : exon,
-                # 'gene' : gene,
-                'primers' : {},
-            }
-            cr.primerTag = '{}'.format(crisprs[name]['name']) #@
-            # cr.primerTag = '{}_{}_{}'.format(crisprs[name]['gene'], crisprs[name]['segment'], crisprs[name]['name'])
+            cr.primerTag = f'{gene.name}_{segment}_{cr.name}'
             gene.crisprs.append(cr)
         else:
             gene.cds = fasta[entry]

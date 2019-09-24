@@ -13,4 +13,7 @@ class Crispr(object):
         self.fprimers = []
         self.rprimers = []
         self.seq = None
+        self.start = None
+        self.stop = None
         self.primerTag = None
+        self.gene = None
