@@ -11,6 +11,7 @@ def spawn_processes(folder):
     # start the multiprocessing
     jobs = []
     files = ntp.find_files(input_loc=folder)
+    print(files)
     proces = int(len(files))
     p = multiprocessing.Pool(processes=proces)
     data = p.map(ntp.Submission, [file for file in files])

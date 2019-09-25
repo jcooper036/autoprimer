@@ -72,9 +72,9 @@ def make_primers(options):
     Make primers using folder (options)
     """
     if not options:
-        options = '/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer/'
+        options = DEFAULT_FOLDER
     now = datetime.datetime.now()
-    response = f"Starting '{com}' at " + now.strftime("%Y-%m-%d.%H-%M")
+    response = f"Starting 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
     slack_client.api_call(
         "chat.postMessage",
         channel=channel,
@@ -85,7 +85,7 @@ def make_primers(options):
 
     # post another message
     now = datetime.datetime.now()
-    response = f"Finshed '{com}' at " + now.strftime("%Y-%m-%d.%H-%M")
+    response = f"Finshed 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
     slack_client.api_call(
         "chat.postMessage",
         channel=channel,
@@ -104,7 +104,7 @@ def help(options):
     )
 
 def status(options):
-    find_folder = os.path.isdir('/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autobot_beta/')
+    find_folder = os.path.isdir(DEFAULT_FOLDER)
     if find_folder:
         response = "Everything looks good, ready to run"
     else:
@@ -132,6 +132,8 @@ def hello(options):
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 # autobot's user ID in Slack: value is assigned after the bot starts up
 autobot_id = None
+
+DEFAULT_FOLDER = '/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autobot_beta/'
 
 # constants
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
