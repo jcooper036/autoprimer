@@ -133,7 +133,9 @@ slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 # autobot's user ID in Slack: value is assigned after the bot starts up
 autobot_id = None
 
-DEFAULT_FOLDER = '/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autobot_beta/'
+# DEFAULT_FOLDER = '/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autobot_beta/'
+DEFAULT_FOLDER = '/mnt/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autobot_beta/'
+
 
 # constants
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
