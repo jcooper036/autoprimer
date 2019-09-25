@@ -11,7 +11,7 @@ def blast_primer(seq):
     
     # this is a bit janky
     GENOME = '/Volumes/i_bio/Crispr_F0_Screens/checkprimer/genome/GRCh38_latest_genomic.fasta'
-    GENOME = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'
+    # GENOME = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'
     
     if not os.path.exists(GENOME + '.nhr'):
         print("UPDATE: making BLAST database for " + GENOME)
