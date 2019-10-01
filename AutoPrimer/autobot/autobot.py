@@ -53,76 +53,95 @@ def handle_command(command, channel):
     for com in COMMANDS:
         if command.startswith(com):
             found_command = True
+
             # parse the command options
             options = parse_command(command, com)
-            # run the command
-            COMMANDS[com](options)
+
+            # add the job to the schedule
+                SCHEDULE[now] = {
+                    'bot':Worker(now, command, options, channel, poster),
+                    'status' : 'init'
+                }
     
     # Default response
     if not found_command:
         options = True
         COMMANDS['help'](options)
 
+def post(message):
+    slack_client.api_call(
+        "chat.postMessage",
+        channel=channel,
+        text=message
+    )  
+
 ########################
 ###### Commands
 ########################
 
-def make_primers(options):
-    """
-    Make primers using folder (options)
-    """
-    if not options:
-        options = DEFAULT_FOLDER
-    now = datetime.datetime.now()
-    response = f"Starting 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
-    slack_client.api_call(
-        "chat.postMessage",
-        channel=channel,
-        text=response or default_response
-    )
-    # run the command
-    ntp.submit_folder(options)
+# def make_primers(options):
+#     """
+#     Make primers using folder (options)
+#     """
+#     if not options:
+#         options = DEFAULT_FOLDER
+#     now = datetime.datetime.now()
 
-    # post another message
-    now = datetime.datetime.now()
-    response = f"Finshed 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
-    slack_client.api_call(
-        "chat.postMessage",
-        channel=channel,
-        text=response or default_response
-            )
+#     # add the job to the schedule
+#     SCHEDULE[now] = {
+#         'bot':Worker(now, command, options),
+#         'status' : 'init'
+#     }
 
-def help(options):
-    now = datetime.datetime.now()
-    response = f"Try using one of these commands : {', '.join(list(COMMANDS.keys()))}"
-    if options:
-        response = "I didn't recognize that command. " + response
-    slack_client.api_call(
-        "chat.postMessage",
-        channel=channel,
-        text=response or default_response
-    )
+#     response = f"Starting 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
+#     slack_client.api_call(
+#         "chat.postMessage",
+#         channel=channel,
+#         text=response or default_response
+#     )
+#     # run the command
+#     ntp.submit_folder(options)
 
-def status(options):
-    find_folder = os.path.isdir(DEFAULT_FOLDER)
-    if find_folder:
-        response = "Everything looks good, ready to run"
-    else:
-        response = "I can't find the autoprimer gene folder - it is possible that the connection is bad"
-    slack_client.api_call(
-        "chat.postMessage",
-        channel=channel,
-        text=response
-    )    
+#     # post another message
+#     now = datetime.datetime.now()
+#     response = f"Finshed 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
+#     slack_client.api_call(
+#         "chat.postMessage",
+#         channel=channel,
+#         text=response or default_response
+#             )
 
-def hello(options):
-    response = f"Hello <@{poster}>! Looking forward to designing some primers for you."
-    slack_client.api_call(
-        "chat.postMessage",
-        link_names=1,
-        channel=channel,
-        text=response
-    )    
+# def help(options):
+#     now = datetime.datetime.now()
+#     response = f"Try using one of these commands : {', '.join(list(COMMANDS.keys()))}"
+#     if options:
+#         response = "I didn't recognize that command. " + response
+#     slack_client.api_call(
+#         "chat.postMessage",
+#         channel=channel,
+#         text=response or default_response
+#     )
+
+# def status(options):
+#     find_folder = os.path.isdir(DEFAULT_FOLDER)
+#     if find_folder:
+#         response = "Everything looks good, ready to run"
+#     else:
+#         response = "I can't find the autoprimer gene folder - it is possible that the connection is bad"
+#     slack_client.api_call(
+#         "chat.postMessage",
+#         channel=channel,
+#         text=response
+#     )    
+
+# def hello(options):
+#     response = f"Hello <@{poster}>! Looking forward to designing some primers for you."
+#     slack_client.api_call(
+#         "chat.postMessage",
+#         link_names=1,
+#         channel=channel,
+#         text=response
+#     )    
 
 ########################
 ###### Run
@@ -146,7 +165,7 @@ COMMANDS = {
     "status" : status,
 }
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
-
+SCHEDULE = {}
 
 if __name__ == "__main__":
     if slack_client.rtm_connect(with_team_state=False):
@@ -158,6 +177,20 @@ if __name__ == "__main__":
             if command:
                 handle_command(command, channel)
             time.sleep(RTM_READ_DELAY)
+
+            # post any start messages
+            for wokr in SCHEDULE:
+                # post any start messages
+                if SCHEDULE[wokr]['status'] == 'init':
+                    post(SCHEDULE[wokr]['bot'].start_message())
+                    # run anything in the scheduler
+                    post(SCHEDULE[wokr]['bot'].run(SCHEDULE)
+
+                # post any done messages
+                if SCHEDULE[wokr]['status'] == 'init':
+                    stopmess = post(SCHEDULE[wokr]['bot'].done_message())
+                    if stopmess: 
+                        post(stopmess)
     else:
         print("Connection failed. Exception traceback printed above.")
 

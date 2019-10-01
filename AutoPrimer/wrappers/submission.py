@@ -55,7 +55,7 @@ class Submission(object):
         """
         self.out = self.gene.sort_output()
         header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%'
-        fname = self.file.split('.fasta')[0] + '_autoprimer_out.csv'
+        fname = self.file.split('.fasta')[0] + '_autoprimer_beta_out.csv'
         ntp.write_csv(fname, self.out, header=header)
 
 if __name__ == "__main__":
