@@ -58,10 +58,10 @@ def handle_command(command, channel):
             options = parse_command(command, com)
 
             # add the job to the schedule
-                SCHEDULE[now] = {
-                    'bot':Worker(now, command, options, channel, poster),
-                    'status' : 'init'
-                }
+            SCHEDULE[now] = {
+                'bot':Worker(now, command, options, channel, poster),
+                'status' : 'init'
+            }
     
     # Default response
     if not found_command:

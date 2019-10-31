@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import AutoPrimer as ntp
+import copy
 
 class Gene(object):
     """
@@ -12,6 +13,8 @@ class Gene(object):
         self.name = name
         self.crisprs = []
         self.cds = None
+        self.end_buffer = 500
+        self.inside_buffer = 150
     
     def __repr__(self):
         return self.name
@@ -21,12 +24,19 @@ class Gene(object):
         Iterate over CRISPRS to find possible primers
         """
         for cr in self.crisprs:
-            cr.start, cr.stop = ntp.find_match(self.cds, cr.seq)
-            leftseg, rightseg = ntp.find_cds_segs(self.cds, cr)
-            left_raw = ntp.pick_primers(leftseg, 'left')
-            right_raw = ntp.pick_primers(rightseg, 'right')
-            cr.fprimers = ntp.raw_to_primers(left_raw, 'left')
-            cr.rprimers = ntp.raw_to_primers(right_raw, 'right')
+            if not cr.complete:
+                cr.start, cr.stop = ntp.find_match(self.cds, cr.seq)
+                leftseg, rightseg = ntp.find_cds_segs(self.cds, cr, end_buffer=self.end_buffer, inside_buffer=self.inside_buffer)
+                left_raw = ntp.pick_primers(leftseg, 'left')
+                right_raw = ntp.pick_primers(rightseg, 'right')
+                
+                temp = ntp.raw_to_primers(left_raw, 'left')
+                for pr in temp:
+                    cr.fprimers[pr] = copy.deepcopy(temp[pr])
+
+                temp = ntp.raw_to_primers(right_raw, 'right')
+                for pr in temp:
+                    cr.rprimers[pr] = copy.deepcopy(temp[pr])
     
     def sort_primers(self):
         """
@@ -34,6 +44,12 @@ class Gene(object):
         """
         for cr in self.crisprs:
             cr.sort_primers()
+    
+    def completeness_check(self):
+        for cr in self.crisprs:
+            if (cr.fprimercount == 2) and (cr.rprimercount == 2):
+                cr.complete = True
+        return all(cr.complete for cr in self.crisprs)
     
     def sort_output(self):
         """

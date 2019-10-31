@@ -10,11 +10,13 @@ settings = {
     'opt_size' : '20',
     'min_size' : '19',
     'max_size' : '25',
-    'min_gc' : '35',
-    'max_gc' : '75',
-    'min_tm' : '59',
-    'opt_tm' : '63',
-    'max_tm' : '67',
+    'min_gc' : '45',
+    'max_gc' : '65',
+    'min_tm' : '60',
+    'opt_tm' : '61',
+    'max_tm' : '62',
+    'gc_clamp' : '1',
+    'max_poly_x' : '3',
     'primer_return_number' : '200'
 }
 
@@ -45,10 +47,12 @@ def pick_primers(template, side, sett=settings):
     min_tm = sett['min_tm']
     opt_tm = sett['opt_tm']
     max_tm = sett['max_tm']
+    gc_clamp = sett['gc_clamp']
+    poly_x = sett['max_poly_x']
     primer_return_num = sett['primer_return_number']
 
     # string concat for settings
-    primer3_settings = 'SEQUENCE_ID=' + sequence_id + '\n' + 'SEQUENCE_TEMPLATE=' + sequence_template + '\n' + 'PRIMER_TASK=' + task + '\n' + 'PRIMER_PICK_LEFT_PRIMER=' + pick_left_primer + '\n' + 'PRIMER_PICK_INTERNAL_OLIGO=' + pick_internal_oligo + '\n' + 'PRIMER_PICK_RIGHT_PRIMER=' + pick_right_primer + '\n' + 'PRIMER_OPT_SIZE=' + opt_size + '\n' + 'PRIMER_MIN_SIZE=' + min_size + '\n' + 'PRIMER_MAX_SIZE=' + max_size + '\n'  + 'PRIMER_EXPLAIN_FLAG=' + explain_flag + '\n' + 'PRIMER_INTERNAL_MIN_TM=' + min_tm + '\n' + 'PRIMER_INTERNAL_OPT_TM=' + opt_tm + '\n' + 'PRIMER_INTERNAL_MAX_TM=' + max_tm + '\n' + 'PRIMER_INTER_MIN_GC=' + min_gc + '\n' + 'PRIMER_INTERNAL_MAX_GC=' + max_gc + '\n' + 'PRIMER_NUM_RETURN=' + primer_return_num + '\n='
+    primer3_settings = 'SEQUENCE_ID=' + sequence_id + '\n' + 'SEQUENCE_TEMPLATE=' + sequence_template + '\n' + 'PRIMER_TASK=' + task + '\n' + 'PRIMER_PICK_LEFT_PRIMER=' + pick_left_primer + '\n' + 'PRIMER_PICK_INTERNAL_OLIGO=' + pick_internal_oligo + '\n' + 'PRIMER_PICK_RIGHT_PRIMER=' + pick_right_primer + '\n' + 'PRIMER_OPT_SIZE=' + opt_size + '\n' + 'PRIMER_MIN_SIZE=' + min_size + '\n' + 'PRIMER_MAX_SIZE=' + max_size + '\n'  + 'PRIMER_EXPLAIN_FLAG=' + explain_flag + '\n' + 'PRIMER_INTERNAL_MIN_TM=' + min_tm + '\n' + 'PRIMER_INTERNAL_OPT_TM=' + opt_tm + '\n' + 'PRIMER_INTERNAL_MAX_TM=' + max_tm + '\n' + 'PRIMER_INTER_MIN_GC=' + min_gc + '\n' + 'PRIMER_INTERNAL_MAX_GC=' + max_gc + '\n' + 'PRIMER_NUM_RETURN=' + primer_return_num + '\n' + 'PRIMER_GC_CLAMP=' + gc_clamp + '\n' + 'PRIMER_MAX_POLY_X=' + poly_x + '\n' '='
 
     # test for primer3
     return ntp.run_primer3(primer3_settings)

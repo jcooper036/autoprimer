@@ -1,6 +1,6 @@
 
 
-def find_cds_segs(cds, cr, end_buffer=550, inside_buffer=150):
+def find_cds_segs(cds, cr, end_buffer=510, inside_buffer=150):
     """
     Input: CDS seqeunce, Crispr object
     Returns: Left and right CDS segment for primer searching

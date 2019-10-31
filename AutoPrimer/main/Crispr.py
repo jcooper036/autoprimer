@@ -23,6 +23,7 @@ class Crispr(object):
         self.gene = None
         self.fprimercount = 0
         self.rprimercount = 0
+        self.complete = False
     
     def sort_primers(self):
         """
@@ -48,5 +49,8 @@ class Crispr(object):
         # for the forward
         # print('Searching for FORWARD primers:')
         self.best_fprimers = ntp.evaluate_primers(self.fprimers)
+        self.fprimercount = len(self.best_fprimers)
+
         # print('Searching for REVERSE primers:')
         self.best_rprimers = ntp.evaluate_primers(self.rprimers)
+        self.rprimercount = len(self.best_rprimers)

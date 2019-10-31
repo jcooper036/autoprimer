@@ -10,13 +10,15 @@ class Submission(object):
     They are meant so that parrallelization can be achieved on the gene level.
     """
 
-    def __init__(self, file):
+    def __init__(self, file, run=True):
         self.file = file
         self.gene = ntp.Gene(self.file.split('/')[-1].split('.fasta')[0])
         self.out = None
         self.step = "Init"
         # call the main set of functions
-        self.main()
+        if run:
+            # allows for manual control when debugging
+            self.main()
         
     def main(self):
         self.step = 'Read Fasta'
@@ -25,6 +27,8 @@ class Submission(object):
         self.find_primers()
         self.step = 'Sorting Primers'
         self.sort_primers()
+        self.step = 'Expanding Serach'
+        self.expand_search()
         self.step = 'Writing Output'
         self.output()
 
@@ -48,6 +52,30 @@ class Submission(object):
         Sorts through potential primers to find good ones
         """
         self.gene.sort_primers()
+
+    def expand_search(self):
+        """
+        Asks the gene which CRISPRs need their search expanded.
+        Then kicks off iterative rounds of the expanded search.
+        """
+        expansion = self.gene.completeness_check()
+        expanded_search_parameters = [(600,500), (700,600), (800,700), (900,800), (1000,900)]
+        while expansion and expanded_search_parameters:
+            
+            # terminal print for process clarity
+            print(f'Expanding search for {self.gene} to {expanded_search_parameters[0][1]}-{expanded_search_parameters[0][0]} from target site')
+            
+            # change the search parameters
+            self.gene.end_buffer, self.gene.inside_buffer = expanded_search_parameters.pop(0)
+            
+            # search the primers
+            self.find_primers()
+            
+            # sort the primers
+            self.sort_primers()
+
+            # check for expansion again
+            expansion = self.gene.completeness_check()
 
     def output(self):
         """

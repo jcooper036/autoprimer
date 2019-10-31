@@ -22,4 +22,7 @@ def submit_folder(folder):
     return data
 
 if __name__ == "__main__":
-    submit_folder('/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer/')
+    if len(sys.argv) == 2:
+        submit_folder(sys.argv[1])
+    else:
+        submit_folder('/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer/')
