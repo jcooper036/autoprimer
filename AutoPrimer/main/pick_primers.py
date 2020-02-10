@@ -16,7 +16,7 @@ settings = {
     'opt_tm' : '61',
     'max_tm' : '62',
     'gc_clamp' : '1',
-    'max_poly_x' : '3',
+    'max_poly_x' : '4',
     'primer_return_number' : '200'
 }
 

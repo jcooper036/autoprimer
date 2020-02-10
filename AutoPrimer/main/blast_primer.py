@@ -9,7 +9,7 @@ def blast_primer(seq):
     Returns True if primer is unique, false if the primer is not.
     """
     
-    # this is a bit janky
+    #@ this is a bit janky - ther are other possible options here
     GENOME = '/Volumes/i_bio/Crispr_F0_Screens/checkprimer/genome/GRCh38_latest_genomic.fasta'
     # GENOME = '/mnt/i_bio/Crispr_F0_Screens/checkprimer/genome/GRCh38_latest_genomic.fasta'
     # GENOME = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'
