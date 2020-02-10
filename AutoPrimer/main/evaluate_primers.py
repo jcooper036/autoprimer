@@ -48,7 +48,7 @@ def evaluate_primers(primers):
         # check blast
         primers[pr]['blast'] = 'Not run'
         if add and (blastCount < max_blast):
-            # print('Blasting {}, try {} / {}'.format(prm.seq, blastCount+1, max_blast))
+            # print('Blasting {}, try {} / {}'.format(prm.seq, blastCount+1, max_blast)) #@
             primers[pr]['blast'] = ntp.blast_primer(prm.seq)
             if not ntp.check_blast_result(primers[pr]['blast']):
                 add = False
@@ -59,7 +59,7 @@ def evaluate_primers(primers):
         primers[pr]['num'] = 'NA'
         if add:
             primers[pr]['num'] = keepCount + 1
-            # print(f'Found primer {keepCount + 1} : {prm.seq}\n')
+            # print(f'Found primer {keepCount + 1} : {prm.seq}\n') #@
             best_primers[pr] = copy.deepcopy(primers[pr])
             start_postitions.append(prm.start)
             keepCount += 1

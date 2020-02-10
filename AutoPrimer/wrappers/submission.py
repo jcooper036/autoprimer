@@ -52,7 +52,26 @@ class Submission(object):
         Sorts through potential primers to find good ones
         """
         self.gene.sort_primers()
+    
+    def write_errors(self):
+        """
+        Writes any errors to the gene folder in a new file
+        """
+        self.gene.write_errors(self.file)
 
+    def output(self):
+        """
+        Writes a csv and returns information to autoprimer.
+        """
+        self.out = self.gene.sort_output()
+        header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%'
+        fname = self.file.split('.fasta')[0] + '_autoprimer_beta_out.csv'
+        ntp.write_csv(fname, self.out, header=header)
+
+if __name__ == "__main__":
+    Submission(sys.argv[1])
+
+    # potential expansion of search, not used right now
     # def expand_search(self):
     #     """
     #     Asks the gene which CRISPRs need their search expanded.
@@ -76,15 +95,3 @@ class Submission(object):
 
     #         # check for expansion again
     #         expansion = self.gene.completeness_check()
-
-    def output(self):
-        """
-        Writes a csv and returns information to autoprimer.
-        """
-        self.out = self.gene.sort_output()
-        header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%'
-        fname = self.file.split('.fasta')[0] + '_autoprimer_beta_out.csv'
-        ntp.write_csv(fname, self.out, header=header)
-
-if __name__ == "__main__":
-    Submission(sys.argv[1])

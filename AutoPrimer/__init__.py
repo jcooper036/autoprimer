@@ -2,8 +2,8 @@
 """init for the AutoPrimer module"""
 
 # autobot
-from AutoPrimer.autobot.autobot import *
-from AutoPrimer.autobot.Worker import Worker
+# from AutoPrimer.autobot.autobot import *
+# from AutoPrimer.autobot.Worker import Worker
 
 # wrappers
 from AutoPrimer.wrappers.find_files import find_files

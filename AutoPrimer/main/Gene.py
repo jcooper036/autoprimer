@@ -15,6 +15,7 @@ class Gene(object):
         self.cds = None
         self.end_buffer = 550
         self.inside_buffer = 150
+        self.error_log = []
     
     def __repr__(self):
         return self.name
@@ -27,16 +28,22 @@ class Gene(object):
             if not cr.complete:
                 cr.start, cr.stop = ntp.find_match(self.cds, cr.seq)
                 leftseg, rightseg = ntp.find_cds_segs(self.cds, cr, end_buffer=self.end_buffer, inside_buffer=self.inside_buffer)
-                left_raw = ntp.pick_primers(leftseg, 'left')
-                right_raw = ntp.pick_primers(rightseg, 'right')
                 
-                temp = ntp.raw_to_primers(left_raw, 'left')
-                for pr in temp:
-                    cr.fprimers[pr] = copy.deepcopy(temp[pr])
+                # need to make sure that both values are true (will fail if too close to the front or the back)
+                if leftseg and rightseg:
+                    left_raw = ntp.pick_primers(leftseg, 'left')
+                    right_raw = ntp.pick_primers(rightseg, 'right')
+                    
+                    temp = ntp.raw_to_primers(left_raw, 'left')
+                    for pr in temp:
+                        cr.fprimers[pr] = copy.deepcopy(temp[pr])
 
-                temp = ntp.raw_to_primers(right_raw, 'right')
-                for pr in temp:
-                    cr.rprimers[pr] = copy.deepcopy(temp[pr])
+                    temp = ntp.raw_to_primers(right_raw, 'right')
+                    for pr in temp:
+                        cr.rprimers[pr] = copy.deepcopy(temp[pr])
+                else:
+                    self.error_log.append(f'{leftseg} - {cr.name}')
+                    print(f'{leftseg} - {cr.name}')
     
     def sort_primers(self):
         """
@@ -47,7 +54,7 @@ class Gene(object):
     
     def completeness_check(self):
         for cr in self.crisprs:
-            if (cr.fprimercount == 2) and (cr.rprimercount == 2):
+            if (cr.fprimercount == cr.max_primer_number) and (cr.rprimercount == cr.max_primer_number):
                 cr.complete = True
         return all(cr.complete for cr in self.crisprs)
     
@@ -69,3 +76,15 @@ class Gene(object):
                 outstring = f'{self.name},{cr.name},{primer_name},{primer_info}'
                 self.out.append(outstring)                
         return self.out
+    
+    def write_errors(self, file):
+        """
+        Input:
+            self
+            file name, str that ends in a suffix (should be .fasta)
+        """
+        if self.error_log:
+            file = file.split('.')[0] + '_errors.txt'
+            with open(file, 'w') as f:
+                for error in self.error_log:
+                    f.write(f'{error}+\n')

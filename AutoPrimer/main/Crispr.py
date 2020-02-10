@@ -24,13 +24,13 @@ class Crispr(object):
         self.fprimercount = 0
         self.rprimercount = 0
         self.complete = False
+        self.max_primer_number = 1
     
     def sort_primers(self):
         """
         Iterates over the left and right primers to evaluate quality.
         """
-        assert self.fprimers
-        assert self.rprimers
+
         assert self.gene
 
         print(f'\nAnalyzing primers for {self.name}')
