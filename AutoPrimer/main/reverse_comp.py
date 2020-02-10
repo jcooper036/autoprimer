@@ -11,5 +11,4 @@ def reverse_comp(sequence):
     }
     for let in sequence:
         rc_seq += rcDict[let.upper()]
-    rc_seq = rc_seq[::-1]
-    return rc_seq
+    return rc_seq[::-1]

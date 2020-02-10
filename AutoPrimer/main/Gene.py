@@ -13,7 +13,7 @@ class Gene(object):
         self.name = name
         self.crisprs = []
         self.cds = None
-        self.end_buffer = 550
+        self.end_buffer = 500
         self.inside_buffer = 150
         self.error_log = []
     
@@ -27,6 +27,8 @@ class Gene(object):
         for cr in self.crisprs:
             if not cr.complete:
                 cr.start, cr.stop = ntp.find_match(self.cds, cr.seq)
+                if cr.start == 'ERROR':
+                    continue
                 leftseg, rightseg = ntp.find_cds_segs(self.cds, cr, end_buffer=self.end_buffer, inside_buffer=self.inside_buffer)
                 
                 # need to make sure that both values are true (will fail if too close to the front or the back)
