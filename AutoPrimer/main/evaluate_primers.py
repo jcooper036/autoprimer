@@ -12,7 +12,7 @@ def evaluate_primers(primers):
     th_max = 8
     start_buffer = 25
     max_blast = 8
-    keep_primers = 2
+    keep_primers = 1
 
     best_primers = {}
     tried_sequences = []
