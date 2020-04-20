@@ -25,7 +25,7 @@ def pick_primers(template, side, sett=settings):
     Input: Template sequence, side is left or right
     Returns: dictionary of primer objects, somewhere between 0 and 4
     """
-
+    
     # settings variables
     sequence_template = template
     if side == 'left':
@@ -33,8 +33,8 @@ def pick_primers(template, side, sett=settings):
         pick_right_primer = '0'
     elif side == 'right':
         pick_left_primer = '0'
-        pick_right_primer = '1'        
-    
+        pick_right_primer = '1'
+
     sequence_id = sett['sequence_id']
     task = sett['task']
     pick_internal_oligo = sett['pick_internal_oligo']

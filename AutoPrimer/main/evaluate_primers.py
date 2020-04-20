@@ -19,7 +19,7 @@ def evaluate_primers(primers):
     start_postitions = []
     blastCount = 0
     keepCount = 0
-    
+
     for pr in primers:
         prm = primers[pr]['pr']
         add = True
@@ -33,14 +33,14 @@ def evaluate_primers(primers):
             add = False
             prm.fail_case = 'Duplicate sequence'
             # print(prm.fail_case) #@
-        
+
         # check the anyTH and endTH
         if (float(prm.anyTH) + float(prm.endTH)) > th_max and add:
             add = False
             prm.fail_case = f'anyTH + endTH > {th_max}'
-        
+
         # start positions need to be appart from each other
-        if start_postitions and add: 
+        if start_postitions and add:
             if any(abs(prm.start - x) <= start_buffer for x in start_postitions):
                 add = False
                 prm.fail_case = f'Too close to another primer'
@@ -75,6 +75,3 @@ def evaluate_primers(primers):
             break
 
     return best_primers
-
-
-   

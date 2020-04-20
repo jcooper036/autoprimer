@@ -25,7 +25,7 @@ class Crispr(object):
         self.rprimercount = 0
         self.complete = False
         self.max_primer_number = 1
-    
+
     def sort_primers(self):
         """
         Iterates over the left and right primers to evaluate quality.
@@ -40,12 +40,12 @@ class Crispr(object):
             start, stop = ntp.find_match(self.gene.cds, self.fprimers[pr]['pr'].seq)
             self.fprimers[pr]['pr'].start = start
             self.fprimers[pr]['pr'].stop = stop
-        
+
         for pr in self.rprimers:
             start, stop = ntp.find_match(self.gene.cds, self.rprimers[pr]['pr'].seq)
             self.rprimers[pr]['pr'].start = start
             self.rprimers[pr]['pr'].stop = stop
-        
+
         # for the forward
         # print('Searching for FORWARD primers:')
         self.best_fprimers = ntp.evaluate_primers(self.fprimers)
