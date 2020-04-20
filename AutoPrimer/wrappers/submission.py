@@ -19,7 +19,7 @@ class Submission(object):
         if run:
             # allows for manual control when debugging
             self.main()
-        
+
     def main(self):
         self.step = 'Read Fasta'
         self.handle_fasta()
@@ -46,13 +46,13 @@ class Submission(object):
         assert self.gene.cds
         assert self.gene.crisprs
         self.gene.find_primers()
-    
+
     def sort_primers(self):
         """
         Sorts through potential primers to find good ones
         """
         self.gene.sort_primers()
-    
+
     def write_errors(self):
         """
         Writes any errors to the gene folder in a new file
@@ -64,7 +64,7 @@ class Submission(object):
         Writes a csv and returns information to autoprimer.
         """
         self.out = self.gene.sort_output()
-        header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%'
+        header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%,DISTANCE_TO_CRISPR,MAX_AT_HOMOPOLYMER,MAX_GC_HOMOPOLYMER'
         fname = self.file.split('.fasta')[0] + '_autoprimer_out.csv'
         ntp.write_csv(fname, self.out, header=header)
 
@@ -80,16 +80,16 @@ if __name__ == "__main__":
     #     expansion = self.gene.completeness_check()
     #     expanded_search_parameters = [(600,500), (700,600), (800,700), (900,800), (1000,900)]
     #     while expansion and expanded_search_parameters:
-            
+
     #         # terminal print for process clarity
     #         print(f'Expanding search for {self.gene} to {expanded_search_parameters[0][1]}-{expanded_search_parameters[0][0]} from target site')
-            
+
     #         # change the search parameters
     #         self.gene.end_buffer, self.gene.inside_buffer = expanded_search_parameters.pop(0)
-            
+
     #         # search the primers
     #         self.find_primers()
-            
+
     #         # sort the primers
     #         self.sort_primers()
 
