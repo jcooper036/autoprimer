@@ -1,0 +1,21 @@
+name: autoprimer
+channels:
+  - recursion # WARNING: Do not modify this comment, travis requires this line to be "recursion # WARNING..."
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.6
+  - google-api-python-client>=1.7.6,<1.8
+  - google-auth>=1.6.1,<1.7
+  - structlog>=18.1,<19
+  - numpy=1.18.1
+  - pandas
+  - scipy=1.4.1
+  - pyfaidx
+  - primer3
+  - blast
+  - cauldron_sdk
+  - jupyterlab
+# !DEV-ENV
+  - pip:

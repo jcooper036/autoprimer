@@ -11,14 +11,14 @@ def read_fasta(file):
     Input: fasta formatted file
     Returns: dictionary of fasta file
     """
-    
+
     fasta = {}
     with open(file, 'r') as f:
         # set some flags and variables
         header = False
         entry = ''
         head = ''
-        
+
         # loop over the lines
         for line in f:
             line = line.rstrip()
@@ -40,7 +40,7 @@ def read_fasta(file):
             # otherwize keep adding to the entry
             else:
                 entry += line
-    
+
         # add in the final entry
         if head and entry:
             fasta[head] = entry
@@ -68,19 +68,21 @@ def main():
     # load in the crRNA table
     crRNA_TABLE = pd.read_csv(sys.argv[2])
 
-    if not os.path.isdir('genes'):
-        os.mkdir('genes')
+    working_path = sys.argv[3]
+
+    if not os.path.isdir(f'{working_path}/genes'):
+        os.mkdir(f'{working_path}/genes')
 
     # for each gene
     for gene in mRNA_FASTA:
 
         if len(mRNA_FASTA[gene]) > 10:
-            
+
             # look for the crRNAs
             assert gene in crRNA_TABLE['gene'].values, f'{gene} is not in the crRNA table'
             df = crRNA_TABLE[crRNA_TABLE['gene'] == gene]
-            temp = df.set_index('number')['sequence'].to_dict()
-            
+            temp = df.set_index('rec_id')['sequence'].to_dict()
+
             # update the names
             towrite = {}
             for seq in temp:
@@ -90,15 +92,15 @@ def main():
             towrite[gene] = mRNA_FASTA[gene]
 
             # write a new folder and new fasta file with that gene
-            if not os.path.isdir(f'genes/{gene}'):
-                os.mkdir(f'genes/{gene}')
+            if not os.path.isdir(f'{working_path}/genes/{gene}'):
+                os.mkdir(f'{working_path}/genes/{gene}')
 
-            write_fasta(towrite, f'genes/{gene}/{gene}.fasta')
+            write_fasta(towrite, f'{working_path}/genes/{gene}/{gene}.fasta')
         else:
             print(gene)
 
 
-        
+
 
 if __name__ == "__main__":
     main()

@@ -2,9 +2,12 @@
 
 import sys
 import gff
+import pandas as pd
 
-human_gff = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.gff'
-human_genome = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'
+#human_gff = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.gff'
+#human_genome = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'
+human_genome = '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna'
+human_gff = '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff'
 
 def read_list(file, lower=False):
     l = []
@@ -21,14 +24,14 @@ def read_fasta(file):
     Input: fasta formatted file
     Returns: dictionary of fasta file
     """
-    
+
     fasta = {}
     with open(file, 'r') as f:
         # set some flags and variables
         header = False
         entry = ''
         head = ''
-        
+
         # loop over the lines
         for line in f:
             line = line.rstrip()
@@ -50,7 +53,7 @@ def read_fasta(file):
             # otherwize keep adding to the entry
             else:
                 entry += line
-    
+
         # add in the final entry
         if head and entry:
             fasta[head] = entry
@@ -96,7 +99,9 @@ def find_gene_sequences(gene_list, parser):
 ######## main
 
 def main():
-    gene_list = read_list(sys.argv[1], lower=True)
+    #gene_list = read_list(sys.argv[1], lower=True)
+    gene_df = pd.read_csv(sys.argv[1])
+    gene_list = gene_df['gene'].unique().tolist()
     parser = gff.GFF(human_gff, human_genome)
     parser.build_genes()
     print('Loaded GFF')
@@ -105,7 +110,7 @@ def main():
     fasta = find_gene_sequences(gene_list, parser)
 
     # write a new fasta file
-    write_fasta(fasta, 'genome_mRNA.fasta')
+    write_fasta(fasta, 'build_fastas/temp/genome_mRNA.fasta')
 
 
 if __name__ == "__main__":
