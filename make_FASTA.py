@@ -57,8 +57,11 @@ def GetGuides(guide_list):
     """
     GnC = [['gene','rec_id','sequence']]
     for guide in guide_list:
-        X = [i for i in api.guides.find(rec_ids = guide)][0]
-        GnC.append([X['gene'], X['rec_id'], X['target_sequence']])
+        try:
+            X = [i for i in api.guides.find(rec_ids = guide)][0]
+            GnC.append([X['gene'], X['rec_id'], X['target_sequence']])
+        except:
+            print ('Did not find ',guide)
     return pd.DataFrame(GnC[1:], columns = GnC[0])
 
 lead_file = ''
@@ -85,6 +88,8 @@ with open(lead_file,'r') as infile:
 # Get a dataframe with guide rna info
 print('Fetching guide information from Cauldron')
 GnC_df = GetGuides(guides)
+
+GnC_df.to_csv(df_out, index = False)
 
 # Run the subprocesses
 print ('collecting genes from genome')
