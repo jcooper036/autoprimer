@@ -19,10 +19,14 @@ def evaluate_primers(primers):
     start_postitions = []
     blastCount = 0
     keepCount = 0
+    primerCount = 1
 
     for pr in primers:
         prm = primers[pr]['pr']
         add = True
+
+        primers[pr]['num'] = primerCount
+        primerCount += 1
 
         # make sure the primer hasn't already failed
         if prm.fail_case:
@@ -40,29 +44,29 @@ def evaluate_primers(primers):
             prm.fail_case = f'anyTH + endTH > {th_max}'
 
         # start positions need to be appart from each other
-        if start_postitions and add:
-            if any(abs(prm.start - x) <= start_buffer for x in start_postitions):
-                add = False
-                prm.fail_case = f'Too close to another primer'
+        # Script generally implemented to return 1 primer, so irrelevant
+        #if start_postitions and add:
+        #    if any(abs(prm.start - x) <= start_buffer for x in start_postitions):
+        #        add = False
+        #        prm.fail_case = f'Too close to another primer'
 
         # check blast
         primers[pr]['blast'] = 'Not run'
         if add and (blastCount < max_blast):
             # print('Blasting {}, try {} / {}'.format(prm.seq, blastCount+1, max_blast)) #@
             primers[pr]['blast'] = ntp.blast_primer(prm.seq)
-            if not ntp.check_blast_result(primers[pr]['blast']):
+            hits = ntp.check_blast_result(primers[pr]['blast'])
+            if hits > 1:
                 add = False
-                prm.fail_case = f'Too close to another primer'
+                prm.fail_case = f'Aligns to {hits} locations'
             blastCount += 1
 
         # if all is good, add the primer
-        primers[pr]['num'] = 'NA'
-        if add:
-            primers[pr]['num'] = keepCount + 1
-            # print(f'Found primer {keepCount + 1} : {prm.seq}\n') #@
-            best_primers[pr] = copy.deepcopy(primers[pr])
-            start_postitions.append(prm.start)
-            keepCount += 1
+        if add: keepCount += 1
+
+        best_primers[pr] = copy.deepcopy(primers[pr])
+        start_postitions.append(prm.start)
+
 
         # always add the sequnece to the tried sequences
         tried_sequences.append(prm.seq)

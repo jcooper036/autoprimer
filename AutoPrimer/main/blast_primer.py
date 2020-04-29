@@ -10,8 +10,8 @@ def blast_primer(seq):
     """
 
     #@ this is a bit janky - ther are other possible options here
-    # GENOME = '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna' #Chris J
-    GENOME = '/Users/$USER/resources/genomes/GRCh38_latest_genomic.fasta'
+    GENOME = '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna' #Chris J
+    #GENOME = '/Users/$USER/resources/genomes/GRCh38_latest_genomic.fasta'
     # GENOME = '/Volumes/i_bio/Crispr_F0_Screens/checkprimer/genome/GRCh38_latest_genomic.fasta'
     # GENOME = '/mnt/i_bio/Crispr_F0_Screens/checkprimer/genome/GRCh38_latest_genomic.fasta'
     # GENOME = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'

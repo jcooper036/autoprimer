@@ -7,7 +7,7 @@
 
 # wrappers
 from AutoPrimer.wrappers.find_files import find_files
-from AutoPrimer.wrappers.Submission import Submission
+from AutoPrimer.wrappers.submission import Submission
 from AutoPrimer.wrappers.spawn_multiprocess import spawn_processes
 from AutoPrimer.wrappers.submit_folder import submit_folder
 
@@ -29,4 +29,4 @@ from AutoPrimer.main.evaluate_primers import evaluate_primers
 from AutoPrimer.main.blast_primer import blast_primer
 from AutoPrimer.main.check_blast_result import check_blast_result
 from AutoPrimer.main.write_csv import write_csv
-from AutoPrimer.main.find_max_polymer import find_max_polymer
+from AutoPrimer.main.find_max_polymer import find_max_polymer, eval_homopolymers
