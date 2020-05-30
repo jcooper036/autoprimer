@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import AutoPrimer as ntp
-#import find_max_polymer as ex
 import copy
 
 class Gene(object):
@@ -10,6 +9,7 @@ class Gene(object):
     - what CRISPRS a gene has
     - the cds of that gene
     """
+
     def __init__(self, name):
         self.name = name
         self.crisprs = []
@@ -21,110 +21,107 @@ class Gene(object):
     def __repr__(self):
         return self.name
 
-    def sort_output_2(self):
-        """
-        Writes a csv of the output to the gene folder.
-        Also returns the output so the submission can use it
-        """
-
-        self.out2 = []
-        self.all_out2 = []
-        for cr in self.crisprs:
-            if not cr.new_fasta_L and not cr.new_fasta_L: continue
-            cr_mid = abs(int((cr.start+cr.stop)/2))
-            cr_name = cr.name
-
-            for pr in cr.best_fprimers2:
-                primer = cr.best_fprimers2[pr]
-                primer_name = 'F' + str(primer['num'])
-                good, outstring = self.eval_primer(primer, primer_name, cr_name, cr.start, cr.stop)
-                self.all_out2.append(outstring)
-                if good:
-                    self.out2.append(outstring)
-
-            for pr in cr.best_rprimers2:
-                primer = cr.best_rprimers2[pr]
-                primer_name = 'R' + str(primer['num'])
-                good, outstring = self.eval_primer(primer, primer_name, cr_name, cr.start, cr.stop)
-                self.all_out2.append(outstring)
-                if good:
-                    self.out2.append(outstring)
-
-        return self.out2, self.all_out2
-
-    def sort_primers_2(self):
-        """
-        Iterate over CRISPRS to sort the primers
-        """
-        for cr in self.crisprs:
-            if cr.new_fasta_L or cr.new_fasta_L:
-                cr.sort_primers_2()
-
-    def find_primers_2(self):
-        """
-        Iterate over CRISPRS to find possible primers with restricted sequence
-        """
-        for cr in self.crisprs:
-            if not cr.new_fasta_L and not cr.new_fasta_L: continue
-            if cr.start == 'ERROR':
-                continue
-            leftseg, rightseg = ntp.find_cds_segs(self.cds, cr, left_buffer=cr.new_L, right_buffer=cr.new_R, inside_buffer=self.inside_buffer)#cr.new_L cr.new_R,
-            print (cr.name,'left buffer',cr.new_L,'right buffer',cr.new_R)
-            print('len leftseg',len(leftseg),'len rightseg',len(rightseg))
-
-            # qualify segments individually if they have new endpoints
-            if leftseg and (cr.new_L != self.end_buffer):
-                print('finding leftseg')
-                left_raw = ntp.pick_primers(leftseg, 'left')
-                temp = ntp.raw_to_primers(left_raw, 'left')
-                for pr in temp:
-                    cr.fprimers2[pr] = copy.deepcopy(temp[pr])
-
-            if rightseg and (cr.new_R != self.end_buffer):
-                print('finding rightseg')
-                right_raw = ntp.pick_primers(rightseg, 'right')
-                temp = ntp.raw_to_primers(right_raw, 'right')
-                for pr in temp:
-                    cr.rprimers2[pr] = copy.deepcopy(temp[pr])
-
-            else:
-                self.error_log.append(f'{leftseg} - {cr.name}')
-                print(f'{leftseg} - {cr.name}')
-
-    def find_primers(self):
+    def find_primers(self, method = 'first'):
         """
         Iterate over CRISPRS to find possible primers
         """
+        settings = {
+            'sequence_id' : 'blank',
+            'task' : 'generic',
+            'pick_internal_oligo' : '0',
+            'explain_flag' : '1',
+            'opt_size' : '20',
+            'min_size' : '19',
+            'max_size' : '25',
+            'min_gc' : '45',
+            'max_gc' : '65',
+            'min_tm' : '60',
+            'opt_tm' : '61',
+            'max_tm' : '62',
+            'gc_clamp' : '1',
+            'max_poly_x' : '4',
+            'primer_return_number' : '200'
+        }
+
         for cr in self.crisprs:
-            if not cr.complete:
+            # conditions to skip iteration
+            if (method == 'first') and cr.complete: continue
+            if (method == 'second') and not cr.new_fasta_L and not cr.new_fasta_L: continue
+
+            # method-specific variables and tasks
+            pick_left = True
+            pick_right = True
+
+            if method == 'first':
                 cr.start, cr.stop = ntp.find_match(self.cds, cr.seq)
-                if cr.start == 'ERROR':
-                    continue
-                leftseg, rightseg = ntp.find_cds_segs(self.cds, cr, left_buffer=self.end_buffer, right_buffer=self.end_buffer, inside_buffer=self.inside_buffer)
+                fprimers = cr.fprimers
+                rprimers = cr.rprimers
 
-                # need to make sure that both values are true (will fail if too close to the front or the back)
-                if leftseg and rightseg:
-                    left_raw = ntp.pick_primers(leftseg, 'left')
-                    right_raw = ntp.pick_primers(rightseg, 'right')
+            elif method == 'second':
+                if cr.out_buffer_L == self.end_buffer: pick_left = False
+                if cr.out_buffer_R == self.end_buffer: pick_right = False
+                fprimers = cr.fprimers2
+                rprimers = cr.rprimers2
 
-                    temp = ntp.raw_to_primers(left_raw, 'left')
-                    for pr in temp:
-                        cr.fprimers[pr] = copy.deepcopy(temp[pr])
+            elif method == 'third':
+                settings = {
+                    'sequence_id' : 'blank',
+                    'task' : 'generic',
+                    'pick_internal_oligo' : '0',
+                    'explain_flag' : '1',
+                    'opt_size' : '20',
+                    'min_size' : '18',
+                    'max_size' : '30',
+                    'min_gc' : '40',
+                    'max_gc' : '70',
+                    'min_tm' : '55',
+                    'opt_tm' : '61',
+                    'max_tm' : '62',
+                    'gc_clamp' : '0',
+                    'max_poly_x' : '5',
+                    'primer_return_number' : '200'
+                }
+                if not cr.loosened_f: pick_left = False
+                if not cr.loosened_r: pick_right = False
+                fprimers = cr.fprimers3
+                rprimers = cr.rprimers3
+                #print ('find primers third')
+            else: print ('find method not recognized')
 
-                    temp = ntp.raw_to_primers(right_raw, 'right')
-                    for pr in temp:
-                        cr.rprimers[pr] = copy.deepcopy(temp[pr])
+            if cr.start == 'ERROR': continue
+            leftseg, rightseg = ntp.find_cds_segs(self.cds, cr, left_buffer=cr.out_buffer_L, right_buffer=cr.out_buffer_R, l_in_buffer=cr.in_buffer_L, r_in_buffer=cr.in_buffer_R)
 
-                else:
-                    self.error_log.append(f'{leftseg} - {cr.name}')
-                    print(f'{leftseg} - {cr.name}')
+            # qualify segments individually
+            if leftseg and pick_left:
+                left_raw = ntp.pick_primers(leftseg, 'left', sett = settings)
+                temp = ntp.raw_to_primers(left_raw, 'left')
+                for pr in temp:
+                    fprimers[pr] = copy.deepcopy(temp[pr])
 
-    def sort_primers(self):
+            if rightseg and pick_right:
+                right_raw = ntp.pick_primers(rightseg, 'right', sett = settings)
+                temp = ntp.raw_to_primers(right_raw, 'right')
+                for pr in temp:
+                    rprimers[pr] = copy.deepcopy(temp[pr])
+            #else:
+            #    self.error_log.append(f'{leftseg} - {cr.name}')
+            #    print(f'{leftseg} - {cr.name}')
+
+    def sort_primers(self, method = 'first'):
         """
         Iterate over CRISPRS to sort the primers
         """
-        for cr in self.crisprs:
-            cr.sort_primers()
+        if method == 'first':
+            for cr in self.crisprs:
+                cr.sort_primers(method = method)
+        if method == 'second':
+            for cr in self.crisprs:
+                if cr.new_fasta_L or cr.new_fasta_R:
+                    cr.sort_primers(method = method)
+        if method == 'third':
+            for cr in self.crisprs:
+                if cr.loosened_f or cr.loosened_r:
+                    cr.sort_primers(method = method)
 
     def completeness_check(self):
         for cr in self.crisprs:
@@ -143,43 +140,79 @@ class Gene(object):
         primer['pr'].distance = distance # adds attribute -how far between primer and crispr site
         primer['pr'].maxAT = max_AT # adds information on homopolymeric tract location and length
         primer['pr'].maxGC = max_GC # adds information on homopolymeric tract location and length
+        # Awkward place to add this as a fail case, neaten up in later versions
+        all_runs = max_AT+';'+max_GC #new
+        if ntp.eval_homopolymers(all_runs, cr_start, 11) < 10000: #new
+            primer['pr'].fail_case = 'Poly-N > 11' #new
         flag = primer['pr'].fail_case
         outstring = f'{self.name},{cr_name},{primer_name},{primer_info},{distance},{max_AT},{max_GC},{flag}' # new here
         if not primer['pr'].fail_case: good = True
         return good, outstring
-        #self.all_out.append(outstring)
-        #if not primer['pr'].fail_case:
-        #    self.out.append(outstring)
 
-    def sort_output(self):
+    def sort_output(self, method = 'first'):
         """
         Writes a csv of the output to the gene folder.
         Also returns the output so the submission can use it
         """
+        keep_primers = 1
+        if method == 'first':
+            self.out = []
+            self.all_out = []
+        elif method == 'second':
+            self.out2 = []
+            self.all_out2 = []
+        elif method == 'third':
+            self.out3 = []
+            self.all_out3 = []
+        else: print ('sort method not recognized')
 
-        self.out = []
-        self.all_out = []
         for cr in self.crisprs:
+            f_found = 0
+            r_found = 0
+            if method == 'first':
+                out = self.out  #
+                all_out = self.all_out #
+                fprimers = cr.best_fprimers #
+                rprimers = cr.best_rprimers #
+
+            elif method == 'second':
+                out = self.out2  #
+                all_out = self.all_out2 #
+                fprimers = cr.best_fprimers2 #
+                rprimers = cr.best_rprimers2 #
+
+            elif method == 'third':
+                out = self.out3  #
+                all_out = self.all_out3 #
+                fprimers = cr.best_fprimers3 #
+                rprimers = cr.best_rprimers3 #
+            else: print ('sort method not recognized')
+
+            if (method == 'second') and not cr.new_fasta_L and not cr.new_fasta_L: continue
+            if (method == 'third') and not cr.loosened_f and not cr.loosened_r: continue
+
             cr_mid = abs(int((cr.start+cr.stop)/2))
             cr_name = cr.name
 
-            for pr in cr.best_fprimers:
-                primer = cr.best_fprimers[pr]
+            for pr in fprimers:
+                primer = fprimers[pr]
                 primer_name = 'F' + str(primer['num'])
                 good, outstring = self.eval_primer(primer, primer_name, cr_name, cr.start, cr.stop)
-                self.all_out.append(outstring)
-                if good:
-                    self.out.append(outstring)
+                all_out.append(outstring)
+                if good and (f_found < keep_primers):
+                    out.append(outstring)
+                    f_found += 1
 
-            for pr in cr.best_rprimers:
-                primer = cr.best_rprimers[pr]
+            for pr in rprimers:
+                primer = rprimers[pr]
                 primer_name = 'R' + str(primer['num'])
                 good, outstring = self.eval_primer(primer, primer_name, cr_name, cr.start, cr.stop)
-                self.all_out.append(outstring)
-                if good:
-                    self.out.append(outstring)
+                all_out.append(outstring)
+                if good and (r_found < keep_primers):
+                    out.append(outstring)
+                    r_found += 1
 
-        return self.out, self.all_out
+        return out, all_out
 
     def write_errors(self, file):
         """

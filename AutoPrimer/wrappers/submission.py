@@ -31,41 +31,42 @@ class Submission(object):
         self.output()
         self.step = 'Evaluating Output'
         if self.evaluate_new_fasta():
-            self.step = 'Rerunning against homopolymers'
-            self.find_secondary_primers()
-            self.sort_secondary_primers()
-            self.secondary_output()
+            self.step = 'Finding primers excluding homopolymeric regions'
+            self.find_primers(method = 'second')
+            self.sort_primers(method = 'second')
+            self.output(method = 'second')
+        self.step = 'Evaluating Output'
+        if self.evaluate_new_criteria():
+            print('Finding primers using relaxed criteria')
+            self.step = 'Finding primers with relaxed criteria'
+            self.find_primers(method = 'third')
+            self.sort_primers(method = 'third')
+            self.output(method = 'third')
 
-    def secondary_output(self):
+    def evaluate_new_criteria(self):
         """
-        Writes a csv and returns information to autoprimer.
+        evaluate need to find new primers using relaxed thermodynamic criteria
         """
-        self.out2, self.all_out2 = self.gene.sort_output_2()
-        header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%,DISTANCE_TO_CRISPR,MAX_AT_HOMOPOLYMER,MAX_GC_HOMOPOLYMER,FLAG'
-        fname = self.file.split('.fasta')[0] + '_autoprimer_out_2.csv'
-        ntp.write_csv(fname, self.out2, header=header)
-        fname = self.file.split('.fasta')[0] + '_autoprimer_out_raw_2.csv'
-        ntp.write_csv(fname, self.all_out2, header=header)
+        relaxed_criteria = False
+        for cr in self.gene.crisprs:
+            cr.loosened_f = False
+            cr.loosened_r = False
+            if (len(cr.best_fprimers) < 1) or (cr.new_fasta_L and len(cr.best_fprimers2) < 1):
+                cr.loosened_f = True
+                relaxed_criteria = True
+            if (len(cr.best_rprimers) < 1) or (cr.new_fasta_R and len(cr.best_rprimers2) < 1):
+                cr.loosened_r = True
+                relaxed_criteria = True
 
-    def sort_secondary_primers(self):
-        """
-        Sorts through potential primers to find good ones
-        """
-        self.gene.sort_primers_2()
-
-    def find_secondary_primers(self):
-        """
-        Call primer3 to find primers with restricted sequence
-        """
-        assert self.gene.cds
-        assert self.gene.crisprs
-        self.gene.find_primers_2()
+        return relaxed_criteria
 
     def evaluate_new_fasta(self):
         """
         evaluates need design additional primers
         """
+        min_internal_buffer = 45
         new_fasta = False
+
         for cr in self.gene.crisprs:
             target = cr.start
             fnum = rnum = F_seq = R_seq = F_PCR = R_PCR = 0
@@ -88,35 +89,41 @@ class Submission(object):
                     rnum += 1
 
             # Make a decision on what to do based on homopolymers:
+            # If sequencing is blocked, move the outside buffer
+            # If PCR is blocked, move inside and outside buffers
+            # move inside buffer right away, outside with separate logic later
             cr.new_fasta_L = False
             cr.new_fasta_R = False
             if F_PCR != 10000:
-                #print('F_PCR',F_PCR)
                 cr.new_fasta_L = True
-                if (R_PCR != 10000) or (R_seq!= 10000):
-                    #print('R_PCR or R_seq',R_PCR,R_seq)
+                cr.in_buffer_L = min_internal_buffer
+                if R_PCR != 10000:
+                    cr.new_fasta_R = True
+                    cr.in_buffer_R = min_internal_buffer
+                elif R_seq!= 10000:
                     cr.new_fasta_R = True
             elif F_seq != 10000:
                 #print('F_seq', F_seq)
-                if (R_PCR != 10000) or (R_seq!= 10000):
-                    #print('R_PCR or R_seq',R_PCR,R_seq)
-                    cr.new_fasta_L = True
+                if R_PCR != 10000:
                     cr.new_fasta_R = True
+                    cr.new_fasta_L = True
+                    cr.in_buffer_R = min_internal_buffer
+                elif R_seq!= 10000:
+                    cr.new_fasta_R = True
+                    cr.new_fasta_L = True
             elif not fnum and (R_seq != 10000):
-                #print('not fnum and R_seq')
                 cr.new_fasta_R = True
             elif R_PCR != 10000:
-                #print('R_PCR',R_PCR)
                 cr.new_fasta_R = True
+                cr.in_buffer_R = min_internal_buffer
 
-            # define new boundaries to be searched
+            # define new outside buffers here
             if cr.new_fasta_L or cr.new_fasta_R:
                 new_fasta = True
-                cr.new_R = min([R_seq, R_PCR, int(self.gene.end_buffer)])
-                cr.new_L = min([F_seq, F_PCR, int(self.gene.end_buffer)])
-                print('new boundaries for ',cr.name,cr.new_L,cr.new_R)
+                cr.out_buffer_R = min([R_seq, R_PCR, int(cr.out_buffer_R)])
+                cr.out_buffer_L = min([F_seq, F_PCR, int(cr.out_buffer_L)])
+                #print('new boundaries for ',cr.name,cr.out_buffer_L,cr.out_buffer_R)
         return new_fasta
-
 
     def handle_fasta(self):
         assert self.file
@@ -125,19 +132,25 @@ class Submission(object):
         # terminal output for clarity
         print('\n\n######################\nFinding primers for the CRISPR sites in {}'.format(self.gene))
 
-    def find_primers(self):
+    def find_primers(self, method = 'first'):
         """
         Call primer3 to find primers
         """
         assert self.gene.cds
         assert self.gene.crisprs
-        self.gene.find_primers()
+        if method == 'first': self.gene.find_primers()
+        elif (method == 'second') or (method == 'third'):
+            self.gene.find_primers(method = method)
+        else: print ('method not recognized')
 
-    def sort_primers(self):
+    def sort_primers(self, method = 'first'):
         """
         Sorts through potential primers to find good ones
         """
-        self.gene.sort_primers()
+        if method == 'first': self.gene.sort_primers()
+        elif (method == 'second') or (method == 'third'):
+            self.gene.sort_primers(method = method)
+        else: print ('method not recognized')
 
     def write_errors(self):
         """
@@ -145,41 +158,32 @@ class Submission(object):
         """
         self.gene.write_errors(self.file)
 
-    def output(self):
+    def output(self, method = 'first'):
         """
         Writes a csv and returns information to autoprimer.
         """
-        self.out, self.all_out = self.gene.sort_output()
         header = 'GENE,CRISPR,PRIMER,SEQUENCE,SIDE,START,TM,GC%,DISTANCE_TO_CRISPR,MAX_AT_HOMOPOLYMER,MAX_GC_HOMOPOLYMER,FLAG'
-        fname = self.file.split('.fasta')[0] + '_autoprimer_out.csv'
-        ntp.write_csv(fname, self.out, header=header)
-        fname = self.file.split('.fasta')[0] + '_autoprimer_out_raw.csv'
-        ntp.write_csv(fname, self.all_out, header=header)
+        if method == 'first':
+            self.out, self.all_out = self.gene.sort_output()
+            out1 = self.out
+            out2 = self.all_out
+            fname1 = self.file.split('.fasta')[0] + '_autoprimer_out.csv'
+            fname2 = self.file.split('.fasta')[0] + '_autoprimer_out_raw.csv'
+        elif method == 'second':
+            self.out2, self.all_out2 = self.gene.sort_output(method = method)
+            out1 = self.out2
+            out2 = self.all_out2
+            fname1 = self.file.split('.fasta')[0] + '_autoprimer_out_2.csv'
+            fname2 = self.file.split('.fasta')[0] + '_autoprimer_out_raw_2.csv'
+        elif method == 'third':
+            self.out3, self.all_out3 = self.gene.sort_output(method = method)
+            out1 = self.out3
+            out2 = self.all_out3
+            fname1 = self.file.split('.fasta')[0] + '_autoprimer_out_3.csv'
+            fname2 = self.file.split('.fasta')[0] + '_autoprimer_out_raw_3.csv'
+        else: print('output method not recognized')
+        ntp.write_csv(fname1, out1, header=header)
+        ntp.write_csv(fname2, out2, header=header)
 
 if __name__ == "__main__":
     Submission(sys.argv[1])
-
-    # potential expansion of search, not used right now
-    # def expand_search(self):
-    #     """
-    #     Asks the gene which CRISPRs need their search expanded.
-    #     Then kicks off iterative rounds of the expanded search.
-    #     """
-    #     expansion = self.gene.completeness_check()
-    #     expanded_search_parameters = [(600,500), (700,600), (800,700), (900,800), (1000,900)]
-    #     while expansion and expanded_search_parameters:
-
-    #         # terminal print for process clarity
-    #         print(f'Expanding search for {self.gene} to {expanded_search_parameters[0][1]}-{expanded_search_parameters[0][0]} from target site')
-
-    #         # change the search parameters
-    #         self.gene.end_buffer, self.gene.inside_buffer = expanded_search_parameters.pop(0)
-
-    #         # search the primers
-    #         self.find_primers()
-
-    #         # sort the primers
-    #         self.sort_primers()
-
-    #         # check for expansion again
-    #         expansion = self.gene.completeness_check()

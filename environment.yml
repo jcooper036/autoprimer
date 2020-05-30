@@ -8,6 +8,7 @@ dependencies:
   - python=3.6
   - google-api-python-client>=1.7.6,<1.8
   - google-auth>=1.6.1,<1.7
+  - google_auth_oauthlib
   - structlog>=18.1,<19
   - numpy=1.18.1
   - pandas
@@ -17,5 +18,8 @@ dependencies:
   - blast
   - cauldron_sdk
   - jupyterlab
+  - xlrd
+  - xlwt
+  - xlsxwriter
 # !DEV-ENV
   - pip:

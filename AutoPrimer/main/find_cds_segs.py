@@ -1,19 +1,19 @@
 
 
-def find_cds_segs(cds, cr, left_buffer=510, right_buffer = 510, inside_buffer=150):
+def find_cds_segs(cds, cr, left_buffer=510, right_buffer = 510, l_in_buffer=150, r_in_buffer =150):
     """
     Input: CDS seqeunce, Crispr object
     Returns: Left and right CDS segment for primer searching
     """
 
-    if (cr.start - left_buffer) < 0:
+    if (cr.start - l_in_buffer) < 0:
         return 'ERROR: CRISPR too close to CDS start', None
 
-    leftseg = cds[cr.start-left_buffer : cr.start-inside_buffer]
+    leftseg = cds[cr.start-left_buffer : cr.start-l_in_buffer]
 
-    if (cr.stop + right_buffer) > len(cds):
+    if (cr.stop + r_in_buffer) > len(cds):
         return 'ERROR: CRISPR too close to CDS end', None
 
-    rightseg = cds[cr.stop+inside_buffer : cr.stop+right_buffer]
+    rightseg = cds[cr.stop+r_in_buffer : cr.stop+right_buffer]
 
     return leftseg, rightseg

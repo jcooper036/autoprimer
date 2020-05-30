@@ -6,7 +6,7 @@ import copy
 def evaluate_primers(primers):
     """
     Input: Dicitonary primers = {'name' : {'pr' : PrimerObject}}
-    Returns: Dictionary of the best primers
+    Returns: Dictionary of all primers until it has found N primers that meet criteria
     """
     # settings
     th_max = 8
@@ -36,15 +36,14 @@ def evaluate_primers(primers):
         if prm.seq in tried_sequences:
             add = False
             prm.fail_case = 'Duplicate sequence'
-            # print(prm.fail_case) #@
 
         # check the anyTH and endTH
         if (float(prm.anyTH) + float(prm.endTH)) > th_max and add:
             add = False
             prm.fail_case = f'anyTH + endTH > {th_max}'
 
+        # might remove otherwise good candidates before the BLAST thing
         # start positions need to be appart from each other
-        # Script generally implemented to return 1 primer, so irrelevant
         #if start_postitions and add:
         #    if any(abs(prm.start - x) <= start_buffer for x in start_postitions):
         #        add = False
@@ -67,15 +66,12 @@ def evaluate_primers(primers):
         best_primers[pr] = copy.deepcopy(primers[pr])
         start_postitions.append(prm.start)
 
-
         # always add the sequnece to the tried sequences
         tried_sequences.append(prm.seq)
 
         # break conditions, which will cause best primers to be returned
         # if we found enough or tried blast too many times
-        if (keepCount == keep_primers) or (blastCount == max_blast):
-            # if blastCount == max_blast:
-            #     print(f'Too many BLAST attempts, moving on.')
-            break
+        #if (keepCount == keep_primers) or (blastCount == max_blast):
+        #    break
 
     return best_primers
