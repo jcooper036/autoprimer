@@ -129,70 +129,73 @@ def fetch_primer_mixes_data():
 
 def sgrna2primer_mix_info(sgrna_id_str, info_type):
     items = sgrna_id_str.split('-')
-    if len(items) > 1:
-        sgrna_id = items[1]
-        if sgrna_id.startswith('C'):
-            sgrna_id_n = sgrna_id.replace('C', '')
-            regex_str = f'[C|/]-?{sgrna_id_n}(?:\D|$)'
-            mix_name_matches_sgrna = selected_primer_mixes_df.Name.str.contains(regex_str, regex=True)
+    if len(items) > 1:    # if there are multiple items delimited by - it looks at the LAST item
+        sgrna_id = items[-1]
+    else: sgrna_id = items[0]
+    if sgrna_id.startswith('C'):
+        sgrna_id_n = sgrna_id.replace('C', '')
+        regex_str = f'[C|/]-?{sgrna_id_n}(?:\D|$)'
+    elif sgrna_id.isdigit():
+        sgrna_id_n = int(sgrna_id)
+        regex_str = f'REC-(GRNA|SGRNA)-0*{sgrna_id_n}(?:\D|$)'
+    else: return None # if the last thing does not match the pattern, return None
+    mix_name_matches_sgrna = selected_primer_mixes_df.Name.str.contains(regex_str, regex=True)
+    try:
+        matching_row = selected_primer_mixes_df[mix_name_matches_sgrna].iloc[0]
+        # print(matching_row.index)
+        if info_type == 'primer_mix':
+            info = matching_row.name
+        elif info_type == 'seq_primer':
             try:
-                matching_row = selected_primer_mixes_df[mix_name_matches_sgrna].iloc[0]
-                # print(matching_row.index)
-                if info_type == 'primer_mix':
-                    info = matching_row.name
-                elif info_type == 'seq_primer':
+                seq_primer = matching_row['Sequencing Primer']
+                if seq_primer is not None and 'for' in seq_primer:
                     try:
-                        seq_primer = matching_row['Sequencing Primer']
-                        if seq_primer is not None and 'for' in seq_primer:
-                            try:
-                                parts = seq_primer.split('; ')
-                                found = False
-                                for part in parts:
-                                    primer, target_sgrnas_str = part.strip().split(' for ')
-                                    target_sgrnas = target_sgrnas_str.split(', ')
-                                    for target_sgrna in target_sgrnas:
-                                        if target_sgrna == sgrna_id:
-                                            seq_primer = primer
-                                            found = True
-                                if not found:
-                                    seq_primer = None
-                            except Exception as e:
-                                seq_primer = None
-                        if seq_primer is None or len(seq_primer) == 0:
-                            warnings.warn(f'{sgrna_id}: No seq_primer found')
+                        parts = seq_primer.split('; ')
+                        found = False
+                        for part in parts:
+                            primer, target_sgrnas_str = part.strip().split(' for ')
+                            target_sgrnas = target_sgrnas_str.split(', ')
+                            for target_sgrna in target_sgrnas:
+                                if target_sgrna == sgrna_id:
+                                    seq_primer = primer
+                                    found = True
+                        if not found:
                             seq_primer = None
                     except Exception as e:
-                        warnings.warn(f'{sgrna_id}: No seq_primer found; error: ' + e)
                         seq_primer = None
-                    """
-                    to_fro_primers = matching_row.loc[['Forward Primer', 'Reverse Primer']]
-                    try:
-                        seq_primer = to_fro_primers[to_fro_primers.str.contains('*', regex=False)][0].replace('*', '')
-                    except IndexError as e:
-                        warnings.warn(f'{sgrna_id}: No selected seq_primer found')
-                        seq_primer = None
-                    """
-                    info = seq_primer
-                elif info_type == 'tm':
-                    try:
-                        tm = matching_row['Tm (60 = plat II)'].replace('C', '')
-                        info = tm
-                    except IndexError as e:
-                        warnings.warn(f'{sgrna_id}: No tm found')
-                        info = None
-                elif info_type == 'size':
-                    try:
-                        size = matching_row.Size
-                        info = size
-                    except IndexError as e:
-                        warnings.warn(f'{sgrna_id}: No size found')
-                        info = None
+                if seq_primer is None or len(seq_primer) == 0:
+                    warnings.warn(f'{sgrna_id}: No seq_primer found')
+                    seq_primer = None
+            except Exception as e:
+                warnings.warn(f'{sgrna_id}: No seq_primer found; error: ' + e)
+                seq_primer = None
+            """
+            to_fro_primers = matching_row.loc[['Forward Primer', 'Reverse Primer']]
+            try:
+                seq_primer = to_fro_primers[to_fro_primers.str.contains('*', regex=False)][0].replace('*', '')
             except IndexError as e:
-                warnings.warn(f'{sgrna_id}: No primer_mix found')
+                warnings.warn(f'{sgrna_id}: No selected seq_primer found')
+                seq_primer = None
+            """
+            info = seq_primer
+        elif info_type == 'tm':
+            try:
+                tm = matching_row['Tm (60 = plat II)'].replace('C', '')
+                info = tm
+            except IndexError as e:
+                warnings.warn(f'{sgrna_id}: No tm found')
                 info = None
-            return info
-
-    return None
+        elif info_type == 'size':
+            try:
+                size = matching_row.Size
+                info = size
+            except IndexError as e:
+                warnings.warn(f'{sgrna_id}: No size found')
+                info = None
+    except IndexError as e:
+        warnings.warn(f'{sgrna_id}: No primer_mix found')
+        info = None
+    return info
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -400,6 +403,7 @@ if __name__ == '__main__':
     sys.stderr = error_file_handle
     #"""
     source_platemap = pd.read_excel(platemap_file, index_col=0, sheet_name=args.sheet_name).astype(str)
+    # Need to change this to allow REC-GRNA-NNNNNN as a format
     source_platemap = source_platemap.applymap(
         lambda x: x if len(x.split('-')) < 3 else '-'.join([x.split('-')[0], x.split('-')[2]]))
     gsheets_primer_mixes_df = fetch_primer_mixes_data()
@@ -424,13 +428,17 @@ if __name__ == '__main__':
 
     consolidated_primer_mix_dfs = []
     consolidated_seq_primer_dfs = []
-    consolidated_primer_mix_df = out_df_template.copy()
-    consolidated_seq_primer_df = out_df_template.copy()
+    consolidated_primer_mix_df = out_df_template.copy() # is this used?
+    consolidated_seq_primer_df = out_df_template.copy() # is this used?
     tms_for_index = []
     out_column_idx = 0
     sorted_tms_and_n_primers = sorted(ns_primers_per_tm.items(), key=lambda x: int(x[0]),
                                       reverse=False)  # [1] would be # guides per temp
-    last_tm = sorted_tms_and_n_primers[-1][0]
+    #last_tm = sorted_tms_and_n_primers[-1][0]
+    try: last_tm = sorted_tms_and_n_primers[-1][0] #new
+    except:#new
+        print ('under the bus!',sorted_tms_and_n_primers)          #new
+        print (sorted_tms_and_n_primers[-1][0])   #new
     all_groups = []
     for tm, n_primers in sorted_tms_and_n_primers:
         is_last_tm = tm == last_tm

@@ -14,7 +14,7 @@ class Gene(object):
         self.name = name
         self.crisprs = []
         self.cds = None
-        self.end_buffer = 500
+        self.end_buffer = 550
         self.inside_buffer = 150
         self.error_log = []
 

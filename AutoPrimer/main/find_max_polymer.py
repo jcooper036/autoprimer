@@ -21,7 +21,7 @@ def find_max_polymer(cds, cr_start, cr_stop, stop):
     AT_list = ''
     GC_list = ''
     run = 1
-    for i in range(len(sequence)):
+    for i in range(1,len(sequence)):
         letter = sequence[i]
         retro = sequence[i-1] # retro is the letter preceding the current letter
         if retro == letter:

@@ -3,11 +3,25 @@
 import sys
 import gff
 import pandas as pd
+import os
 
-#human_gff = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.gff'
-#human_genome = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'
-human_genome = '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna'
-human_gff = '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff'
+hg_paths = ['/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta',
+    '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna',
+    '/Users/matlab/Documents/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna']
+hgff_paths = ['/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.gff',
+    '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff',
+    '/Users/matlab/Documents/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff']
+
+human_genome = ''
+human_gff = ''
+
+for path in hg_paths:
+    if os.path.isfile(path): human_genome = path
+if human_genome == '': print ('human_genome not correctly specified')
+
+for path in hgff_paths:
+    if os.path.isfile(path): human_gff = path
+if human_gff == '': print ('human_gff not correctly specified')
 
 def read_list(file, lower=False):
     l = []

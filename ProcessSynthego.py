@@ -9,6 +9,7 @@
 
 import pandas as pd
 import os
+import cauldron_sdk as api
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 
@@ -48,19 +49,56 @@ class GetInfile:
             self.window.destroy()
 
 def SortSynthego(df_in):
-    df_in.rename(columns = {'Notes':'Synthego Notes'}, inplace = True)
-    df_in['Notes'] = ''
-    df = df_in[['Label','ICE','R Squared','KO-Score','Guide Sequences','Synthego Notes','Notes']].copy()
+    df = df_in.copy()
+    out_columns = ['cell_type','gene_name','rec_id','exp_name','sample_name','knockout_rate','mutation_rate','r_squared','approx_seed_date','Guide Sequences','Synthego Notes','Notes']
+    col_rename = {'Label':'sample_name','KO-Score':'knockout_rate','ICE':'mutation_rate','R Squared':'r_squared','Notes':'Synthego Notes'}
+    df.rename(columns = col_rename, inplace = True)
+    df['Notes'] = ''
+    df['cell_type'] = ''
+    df = AddGeneRec(df)
+    df['exp_name'] = ''
+    df['approx_seed_date'] = ''
+    df = df[out_columns]
+    r_idx = df.columns.get_loc('r_squared')
+    n_idx = df.columns.get_loc('Notes')
     for i in range(len(df)):
-        if df.iloc[i,2] == 'None': continue
-        if float(df.iloc[i,2]) < 0.8: df.iloc[i,6] = 'R squared < 0.8'
-        if float(df.iloc[i,2]) < 0.5: df.iloc[i,6] = 'R squared < 0.5'
-    df1 = df.query("Notes != 'R squared < 0.5' and ICE != 'None'").sort_values('Label')
+        if df.iloc[i,7] == 'None': continue
+        if float(df.iloc[i,r_idx]) < 0.8: df.iloc[i,n_idx] = 'R squared < 0.8'
+        if float(df.iloc[i,r_idx]) < 0.5: df.iloc[i,n_idx] = 'R squared < 0.5'
+    df1 = df.query("Notes != 'R squared < 0.5' and mutation_rate != 'None'").sort_values('sample_name')
     df2 = df.dropna(subset = ['Synthego Notes'])
     df3 = df[df['Notes'] == 'R squared < 0.5']
-    df4 = pd.concat([df2, df3]).sort_values('Label')
-    df_blank = pd.DataFrame([['','','','','','',''],['Failed','','','','','','']], columns = ['Label','ICE','R Squared','KO-Score','Guide Sequences','Synthego Notes','Notes'])
+    df4 = pd.concat([df2, df3]).sort_values('sample_name')
+    df_blank = pd.DataFrame([['','','','','','','','','','','',''],
+                             ['Failed','','','','','','','','','','','']], columns = out_columns)
     return pd.concat([df1,df_blank,df4])
+
+def AddGeneRec(df_in):
+    # Adds gene and rec_id for each element
+    df = df_in.copy()
+    df['gene_name'] = ''
+    df['rec_id'] = ''
+    # build dicts of sequences in df
+    sequences = df['Guide Sequences'].unique().tolist()
+    REC_IDS = {}
+    GENES = {}
+    for sequence in sequences:
+        try:
+            x = [i for i in api.guides.find(target_sequences = sequence)][0]
+            REC_IDS[sequence] = x['rec_id']
+            GENES[sequence] = x['gene']
+        except:
+            REC_IDS[sequence] = 'unknown'
+            GENES[sequence] = 'unknown'
+    # assign values to df
+    g_idx = df.columns.get_loc('Guide Sequences')
+    for i in range(len(df)):
+        sequence = df.iloc[i, g_idx]
+        gene = GENES[sequence]
+        rec_id = REC_IDS[sequence]
+        df.iloc[i,-1] = rec_id
+        df.iloc[i,-2] = gene
+    return df
 
 lead_file = ''
 
