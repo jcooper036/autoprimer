@@ -1,16 +1,24 @@
 #! /usr/bin/env python3
 
 import sys
-import gff
 import pandas as pd
 import os
+import sys
+sys.path.insert(0, 'build_fastas/')
+import gff
 
+# Could be better specified as a set of paths and a set of  files?
+# os.join(path,file) would be created and tested later
 hg_paths = ['/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta',
-    '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna',
-    '/Users/matlab/Documents/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna']
+    '~/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna',
+    '/Users/matlab/Documents/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna',
+    '../resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna',
+    'resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.fna']
 hgff_paths = ['/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.gff',
-    '/Users/chris.johnson/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff',
-    '/Users/matlab/Documents/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff']
+    '~/Documents/resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff',
+    '/Users/matlab/Documents/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff',
+    '../resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff',
+    'resources/genomes/GCF_000001405.39_GRCh38.p13_genomic.gff']
 
 human_genome = ''
 human_gff = ''
@@ -112,9 +120,9 @@ def find_gene_sequences(gene_list, parser):
 ###############################
 ######## main
 
-def main():
+def get_gene_mrna(gene_df_file):
     #gene_list = read_list(sys.argv[1], lower=True)
-    gene_df = pd.read_csv(sys.argv[1])
+    gene_df = pd.read_csv(gene_df_file)
     gene_list = gene_df['gene'].unique().tolist()
     parser = gff.GFF(human_gff, human_genome)
     parser.build_genes()
@@ -128,4 +136,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    gene_df_file = sys.argv[1]
+    get_gene_mrna(gene_df_file)

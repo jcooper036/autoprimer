@@ -50,7 +50,7 @@ class GetInfile:
         else:
             self.window.destroy()
 
-def GetGuides(guide_list):
+def get_guides(guide_list):
     """
     Query Cauldron with a list of guide REC IDs and return a dataframe with
     gene, rec_id, target_sequence
@@ -87,7 +87,7 @@ with open(lead_file,'r') as infile:
 
 # Get a dataframe with guide rna info
 print('Fetching guide information from Cauldron')
-GnC_df = GetGuides(guides)
+GnC_df = get_guides(guides)
 
 GnC_df.to_csv(df_out, index = False)
 

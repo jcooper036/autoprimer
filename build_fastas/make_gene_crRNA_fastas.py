@@ -61,14 +61,12 @@ def write_fasta(d, file):
             f.write(breakformat(value))
             f.write('\n')
 
-def main():
+def make_FASTA(mRNA_df, crRNA_file, working_path):
     # load in the mRNA fasta
-    mRNA_FASTA = read_fasta(sys.argv[1])
+    mRNA_FASTA = read_fasta(mRNA_df)
 
     # load in the crRNA table
-    crRNA_TABLE = pd.read_csv(sys.argv[2])
-
-    working_path = sys.argv[3]
+    crRNA_TABLE = pd.read_csv(crRNA_file)
 
     if not os.path.isdir(f'{working_path}/genes'):
         os.mkdir(f'{working_path}/genes')
@@ -103,4 +101,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    mRNA_df = sys.argv[1]
+    crRNA_file = sys.argv[2]
+    working_path = sys.argv[3]
+    make_FASTA(mRNA_df, crRNA_file, working_path)
