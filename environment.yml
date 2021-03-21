@@ -6,12 +6,9 @@ channels:
   - bioconda
 dependencies:
   - python=3.6
-  - google-api-python-client>=1.7.6,<1.8
-  - google-auth>=1.6.1,<1.7
-  - google-auth-oauthlib
   - structlog>=18.1,<19
   - numpy=1.18.1
-  - pandas
+  - pandas=0.22.0
   - scipy=1.4.1
   - pyfaidx
   - primer3
@@ -21,6 +18,9 @@ dependencies:
   - xlrd
   - xlwt
   - xlsxwriter
-  - griphook
+  - griphook>=2.0
+  - google-api-python-client
+  - google-auth
+  - google-auth-oauthlib
 # !DEV-ENV
   - pip:
