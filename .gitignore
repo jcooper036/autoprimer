@@ -1,3 +1,7 @@
+# specific things that are likely to change
+build_fastas/temp/
+resources/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
