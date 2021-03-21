@@ -1,6 +1,8 @@
 # specific things that are likely to change
 build_fastas/temp/
 resources/
+credentials.json
+token.pickle
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
