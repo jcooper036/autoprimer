@@ -4,6 +4,9 @@ import datetime
 import AutoPrimer as ntp
 import os
 
+
+FOLDER = "/data"
+
 class Worker(object):
 
     def __init__(self, name, command, options, channel, poster):
@@ -59,14 +62,15 @@ class Worker(object):
     ##### Commands
     #######
 
+
     def find_primers(self):
         """
         Initiates AutoPrimer
         """
         self.status = 'running'
         if not self.options:
-            self.options = '/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer'
-        find_folder = os.path.isdir('/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer')
+            self.options = FOLDER
+            find_folder = FOLDER 
         if find_folder:
             ntp.submit_folder(self.options)
             self.status = 'done'
@@ -78,17 +82,15 @@ class Worker(object):
         Checks the connection status to a given folder
         """
         if self.options:
-            folder = self.options
             find_folder = os.path.isdir(self.options)
             
         else:
-            folder = '/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer'
-            find_folder = os.path.isdir('/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer')
+            find_folder = os.path.isdir(FOLDER)
         
         if find_folder:
-            response = f"Connection established with {folder}. Everything looks good, ready to run"
+            response = f"Connection established with {FOLDER}. Everything looks good, ready to run"
         else:
-            response = f"I can't find the {folder} - it is possible that the connection is bad"
+            response = f"I can't find the {FOLDER} - it is possible that the connection is bad"
         
         self.status = 'expired'
         return response

@@ -7,7 +7,6 @@ gff output line
 from pyfaidx import Faidx
 
 
-file = '/Users/jacob.cooper/resources/genomes/GRCh38_latest_genomic.fasta'
 chromosome = 'NC_000001.11'
 start = 11980181
 end = 12013515

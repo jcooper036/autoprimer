@@ -25,4 +25,4 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         submit_folder(sys.argv[1])
     else:
-        submit_folder('/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autoprimer/')
+        raise ValueError("must supply a submission destination")

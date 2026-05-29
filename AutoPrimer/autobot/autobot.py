@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 
 # https://www.fullstackpython.com/blog/build-first-slack-bot-python.html
-# export SLACK_BOT_TOKEN=xoxb-2984982615-762823711127-RU9n3ojzHVkmqwI0VLVakxMq
+# export SLACK_BOT_TOKEN=<token>
 # source autoprimer/bin/activate
+
 import AutoPrimer as ntp
 import os
 import time
@@ -87,8 +88,7 @@ slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 # autobot's user ID in Slack: value is assigned after the bot starts up
 autobot_id = None
 
-# DEFAULT_FOLDER = '/Volumes/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autobot_beta/'
-DEFAULT_FOLDER = '/mnt/i_bio/Crispr_F0_Screens/0-Genes_for_design/Genes_for_autobot_beta/'
+DEFAULT_FOLDER = '/data'
 
 
 # constants
@@ -129,69 +129,3 @@ if __name__ == "__main__":
     else:
         print("Connection failed. Exception traceback printed above.")
 
-
-
-
-########################
-###### Commands
-########################
-
-# def make_primers(options):
-#     """
-#     Make primers using folder (options)
-#     """
-#     if not options:
-#         options = DEFAULT_FOLDER
-#     now = datetime.datetime.now()
-
-#     # add the job to the schedule
-#     SCHEDULE[now] = {
-#         'bot':Worker(now, command, options),
-#         'status' : 'init'
-#     }
-
-#     response = f"Starting 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
-#     slack_client.api_call(
-#         "chat.postMessage",
-#         channel=channel,
-#         text=response or default_response
-#     )
-#     # run the command
-#     ntp.submit_folder(options)
-
-#     # post another message
-#     now = datetime.datetime.now()
-#     response = f"Finshed 'make_primers' at " + now.strftime("%Y-%m-%d.%H-%M")
-#     slack_client.api_call(
-#         "chat.postMessage",
-#         channel=channel,
-#         text=response or default_response
-#             )
-
-# def help(options):
-#     now = datetime.datetime.now()
-#     response = f"Try using one of these commands : {', '.join(list(COMMANDS.keys()))}"
-#     if options:
-        
-
-
-# def status(options):
-#     find_folder = os.path.isdir(DEFAULT_FOLDER)
-#     if find_folder:
-#         response = "Everything looks good, ready to run"
-#     else:
-#         response = "I can't find the autoprimer gene folder - it is possible that the connection is bad"
-#     slack_client.api_call(
-#         "chat.postMessage",
-#         channel=channel,
-#         text=response
-#     )    
-
-# def hello(options):
-#     response = f"Hello <@{poster}>! Looking forward to designing some primers for you."
-#     slack_client.api_call(
-#         "chat.postMessage",
-#         link_names=1,
-#         channel=channel,
-#         text=response
-#     )    
